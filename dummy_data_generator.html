@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dummy Data Generator by Mehul</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        input, select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .download-btn {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(86, 171, 47, 0.3);
+        }
+        
+        .download-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .preview {
+            margin-top: 30px;
+        }
+        
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        tbody tr:hover {
+            background: #f0f8ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Dummy Data Generator by Mehul</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="companyName">Company/Project Name:</label>
+                <input type="text" id="companyName" value="Building Minds" placeholder="Enter your company or project name">
+            </div>
+            <div class="control-group">
+                <label for="dataType">Data Type:</label>
+                <select id="dataType">
+                    <option value="employees" selected>Employee Records</option>
+                    <option value="customers">Customer Database</option>
+                    <option value="products">Product Inventory</option>
+                    <option value="sales">Sales Transactions</option>
+                    <option value="students">Student Records</option>
+                    <option value="orders">Order Management</option>
+                    <option value="financial">Financial Records</option>
+                    <option value="custom">Custom Dataset</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="rowCount">Number of Records:</label>
+                <input type="number" id="rowCount" value="150000" min="1000" max="500000">
+            </div>
+            <div class="control-group">
+                <label for="targetSize">Target File Size (MB):</label>
+                <input type="number" id="targetSize" value="18" min="1" max="50">
+            </div>
+            <div class="control-group">
+                <label for="dataComplexity">Data Complexity:</label>
+                <select id="dataComplexity">
+                    <option value="basic">Basic (8-12 columns)</option>
+                    <option value="standard" selected>Standard (12-18 columns)</option>
+                    <option value="detailed">Detailed (18-25 columns)</option>
+                    <option value="comprehensive">Comprehensive (25+ columns)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="fileFormat">Export Format:</label>
+                <select id="fileFormat">
+                    <option value="xlsx" selected>Excel (.xlsx)</option>
+                    <option value="csv">CSV (.csv)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button class="generate-btn" onclick="generateData()">Generate Data</button>
+            <button class="download-btn" id="downloadBtn" onclick="downloadExcel()" disabled>Download Excel File</button>
+        </div>
+        
+        <div class="progress" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div id="info" class="info" style="display: none;">
+            <p id="infoText"></p>
+        </div>
+        
+        <div class="preview" id="preview"></div>
+    </div>
+
+    <script>
+        let generatedData = [];
+        let currentWorkbook = null;
+        
+        // Sample data arrays for generating realistic dummy data
+        const firstNames = ['Emma', 'Liam', 'Olivia', 'Noah', 'Ava', 'Ethan', 'Sophia', 'Mason', 'Isabella', 'William', 'Charlotte', 'James', 'Amelia', 'Benjamin', 'Mia', 'Lucas', 'Harper', 'Henry', 'Evelyn', 'Alexander', 'Abigail', 'Michael', 'Emily', 'Elijah', 'Elizabeth', 'Daniel', 'Sofia', 'Matthew', 'Ella', 'Aiden'];
+        
+        const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson'];
+        
+        const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations', 'Research & Development', 'Customer Support', 'Quality Assurance', 'Product Management', 'Data Science', 'UX/UI Design', 'Legal', 'Procurement', 'Facilities'];
+        
+        const skills = ['Leadership', 'Communication', 'Problem Solving', 'Project Management', 'Data Analysis', 'Programming', 'Creative Thinking', 'Team Collaboration', 'Strategic Planning', 'Customer Service', 'Technical Writing', 'Public Speaking', 'Negotiation', 'Time Management', 'Innovation'];
+        
+        const cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Jacksonville', 'Fort Worth', 'Columbus', 'Charlotte', 'Seattle', 'Denver', 'Boston', 'Nashville', 'Portland'];
+        
+        const certifications = ['PMP', 'Scrum Master', 'AWS Certified', 'Google Analytics', 'Salesforce Admin', 'Six Sigma', 'ITIL', 'CPA', 'MBA', 'PHR', 'CISSP', 'Microsoft Certified', 'Tableau Certified', 'Agile Certified', 'Data Science Certificate'];
+        
+        function getRandomElement(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+        
+        function getRandomDate(start, end) {
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        }
+        const products = ['Laptop Pro X1', 'Wireless Headphones', 'Smart Phone', 'Tablet Ultra', 'Gaming Monitor', 'Mechanical Keyboard', 'Ergonomic Mouse', 'External SSD', 'USB-C Hub', 'Webcam HD'];
+        const categories = ['Electronics', 'Computers', 'Audio', 'Mobile', 'Gaming', 'Accessories', 'Storage', 'Networking', 'Office Supplies', 'Software'];
+        const countries = ['United States', 'Canada', 'United Kingdom', 'Germany', 'France', 'Australia', 'Japan', 'India', 'Brazil', 'Mexico'];
+        const subjects = ['Mathematics', 'Science', 'English', 'History', 'Geography', 'Art', 'Music', 'Physical Education', 'Computer Science', 'Foreign Language'];
+        const grades = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F'];
+        
+        function generateRecord(id, dataType, companyName) {
+            switch(dataType) {
+                case 'employees':
+                    return generateEmployee(id, companyName);
+                case 'customers':
+                    return generateCustomer(id, companyName);
+                case 'products':
+                    return generateProduct(id, companyName);
+                case 'sales':
+                    return generateSale(id, companyName);
+                case 'students':
+                    return generateStudent(id, companyName);
+                case 'orders':
+                    return generateOrder(id, companyName);
+                case 'financial':
+                    return generateFinancialRecord(id, companyName);
+                default:
+                    return generateEmployee(id, companyName);
+            }
+        }
+        
+        function generateCustomer(id, companyName) {
+            const firstName = getRandomElement(firstNames);
+            const lastName = getRandomElement(lastNames);
+            const complexity = document.getElementById('dataComplexity').value;
+            
+            const baseRecord = {
+                'Customer_ID': `CUST${String(id).padStart(6, '0')}`,
+                'First_Name': firstName,
+                'Last_Name': lastName,
+                'Email': `${firstName.toLowerCase()}.${lastName.toLowerCase()}@email.com`,
+                'Phone': `+1-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
+                'City': getRandomElement(cities),
+                'Country': getRandomElement(countries),
+                'Registration_Date': getRandomDate(new Date(2020, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0],
+                'Status': getRandomElement(['Active', 'Inactive', 'VIP', 'Premium'])
+            };
+            
+            if (complexity !== 'basic') {
+                Object.assign(baseRecord, {
+                    'Age': Math.floor(Math.random() * 60) + 18,
+                    'Gender': getRandomElement(['Male', 'Female', 'Other']),
+                    'Total_Orders': Math.floor(Math.random() * 100),
+                    'Total_Spent': (Math.random() * 10000).toFixed(2),
+                    'Preferred_Category': getRandomElement(categories),
+                    'Newsletter_Subscribed': Math.random() > 0.3 ? 'Yes' : 'No'
+                });
+            }
+            
+            if (complexity === 'detailed' || complexity === 'comprehensive') {
+                Object.assign(baseRecord, {
+                    'Last_Login': getRandomDate(new Date(2024, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0],
+                    'Marketing_Consent': Math.random() > 0.4 ? 'Yes' : 'No',
+                    'Loyalty_Points': Math.floor(Math.random() * 5000),
+                    'Referral_Code': `REF${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+                    'Account_Manager': `${getRandomElement(firstNames)} ${getRandomElement(lastNames)}`
+                });
+            }
+            
+            return baseRecord;
+        }
+        
+        function generateProduct(id, companyName) {
+            const product = getRandomElement(products);
+            const complexity = document.getElementById('dataComplexity').value;
+            
+            const baseRecord = {
+                'Product_ID': `PROD${String(id).padStart(6, '0')}`,
+                'Product_Name': product,
+                'Category': getRandomElement(categories),
+                'Price': (Math.random() * 2000 + 10).toFixed(2),
+                'Stock_Quantity': Math.floor(Math.random() * 1000),
+                'Supplier': `${companyName} Suppliers Inc`,
+                'Date_Added': getRandomDate(new Date(2020, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0],
+                'Status': getRandomElement(['Active', 'Discontinued', 'Out of Stock'])
+            };
+            
+            if (complexity !== 'basic') {
+                Object.assign(baseRecord, {
+                    'SKU': `SKU-${String(Math.floor(Math.random() * 100000)).padStart(5, '0')}`,
+                    'Weight_kg': (Math.random() * 10).toFixed(2),
+                    'Dimensions': `${Math.floor(Math.random() * 50)}x${Math.floor(Math.random() * 30)}x${Math.floor(Math.random() * 20)}cm`,
+                    'Rating': (Math.random() * 4 + 1).toFixed(1),
+                    'Review_Count': Math.floor(Math.random() * 500),
+                    'Warranty_Months': getRandomElement([6, 12, 24, 36])
+                });
+            }
+            
+            return baseRecord;
+        }
+        
+        function generateSale(id, companyName) {
+            const complexity = document.getElementById('dataComplexity').value;
+            
+            const baseRecord = {
+                'Transaction_ID': `TXN${String(id).padStart(8, '0')}`,
+                'Customer_ID': `CUST${String(Math.floor(Math.random() * 50000) + 1).padStart(6, '0')}`,
+                'Product_ID': `PROD${String(Math.floor(Math.random() * 1000) + 1).padStart(6, '0')}`,
+                'Sale_Date': getRandomDate(new Date(2023, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0],
+                'Quantity': Math.floor(Math.random() * 10) + 1,
+                'Unit_Price': (Math.random() * 500 + 10).toFixed(2),
+                'Total_Amount': (Math.random() * 1000 + 50).toFixed(2),
+                'Sales_Rep': `${getRandomElement(firstNames)} ${getRandomElement(lastNames)}`
+            };
+            
+            if (complexity !== 'basic') {
+                Object.assign(baseRecord, {
+                    'Discount_Percent': Math.floor(Math.random() * 20),
+                    'Payment_Method': getRandomElement(['Credit Card', 'Debit Card', 'PayPal', 'Bank Transfer', 'Cash']),
+                    'Shipping_Cost': (Math.random() * 20).toFixed(2),
+                    'Tax_Amount': (parseFloat(baseRecord.Total_Amount) * 0.08).toFixed(2),
+                    'Commission': (parseFloat(baseRecord.Total_Amount) * 0.05).toFixed(2)
+                });
+            }
+            
+            return baseRecord;
+        }
+        
+        function generateStudent(id, companyName) {
+            const firstName = getRandomElement(firstNames);
+            const lastName = getRandomElement(lastNames);
+            const complexity = document.getElementById('dataComplexity').value;
+            
+            const baseRecord = {
+                'Student_ID': `STU${String(id).padStart(6, '0')}`,
+                'First_Name': firstName,
+                'Last_Name': lastName,
+                'Email': `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${companyName.toLowerCase().replace(/\s+/g, '')}.edu`,
+                'Grade_Level': getRandomElement(['9th', '10th', '11th', '12th', 'Freshman', 'Sophomore', 'Junior', 'Senior']),
+                'GPA': (Math.random() * 3 + 1).toFixed(2),
+                'Enrollment_Date': getRandomDate(new Date(2020, 8, 1), new Date(2024, 8, 30)).toISOString().split('T')[0],
+                'Status': getRandomElement(['Active', 'Graduated', 'Transferred', 'Inactive'])
+            };
+            
+            if (complexity !== 'basic') {
+                Object.assign(baseRecord, {
+                    'Birth_Date': getRandomDate(new Date(2000, 0, 1), new Date(2010, 11, 31)).toISOString().split('T')[0],
+                    'Guardian_Name': `${getRandomElement(firstNames)} ${lastName}`,
+                    'Guardian_Phone': `+1-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
+                    'Major': getRandomElement(subjects),
+                    'Credits_Completed': Math.floor(Math.random() * 120),
+                    'Scholarship': Math.random() > 0.7 ? 'Yes' : 'No'
+                });
+            }
+            
+            return baseRecord;
+        }
+        
+        function generateOrder(id, companyName) {
+            const complexity = document.getElementById('dataComplexity').value;
+            
+            const baseRecord = {
+                'Order_ID': `ORD${String(id).padStart(8, '0')}`,
+                'Customer_ID': `CUST${String(Math.floor(Math.random() * 50000) + 1).padStart(6, '0')}`,
+                'Order_Date': getRandomDate(new Date(2023, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0],
+                'Ship_Date': getRandomDate(new Date(2023, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0],
+                'Order_Status': getRandomElement(['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled']),
+                'Total_Amount': (Math.random() * 1500 + 25).toFixed(2),
+                'Shipping_Address': `${Math.floor(Math.random() * 9999) + 1} ${getRandomElement(['Main', 'Oak', 'Pine', 'Elm', 'Cedar'])} St`,
+                'City': getRandomElement(cities)
+            };
+            
+            if (complexity !== 'basic') {
+                Object.assign(baseRecord, {
+                    'Priority': getRandomElement(['Standard', 'Express', 'Overnight']),
+                    'Tracking_Number': `TRK${String(Math.floor(Math.random() * 1000000000)).padStart(10, '0')}`,
+                    'Carrier': getRandomElement(['UPS', 'FedEx', 'USPS', 'DHL']),
+                    'Items_Count': Math.floor(Math.random() * 10) + 1,
+                    'Weight_kg': (Math.random() * 20).toFixed(2),
+                    'Insurance': Math.random() > 0.6 ? 'Yes' : 'No'
+                });
+            }
+            
+            return baseRecord;
+        }
+        
+        function generateFinancialRecord(id, companyName) {
+            const complexity = document.getElementById('dataComplexity').value;
+            
+            const baseRecord = {
+                'Transaction_ID': `FIN${String(id).padStart(8, '0')}`,
+                'Account_Number': `ACC${String(Math.floor(Math.random() * 1000000)).padStart(8, '0')}`,
+                'Transaction_Date': getRandomDate(new Date(2023, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0],
+                'Transaction_Type': getRandomElement(['Debit', 'Credit', 'Transfer', 'Fee', 'Interest']),
+                'Amount': (Math.random() * 10000 - 5000).toFixed(2),
+                'Balance': (Math.random() * 50000).toFixed(2),
+                'Description': getRandomElement(['ATM Withdrawal', 'Direct Deposit', 'Online Transfer', 'Check Deposit', 'Service Charge']),
+                'Category': getRandomElement(['Income', 'Expense', 'Investment', 'Savings', 'Transfer'])
+            };
+            
+            if (complexity !== 'basic') {
+                Object.assign(baseRecord, {
+                    'Reference_Number': `REF${String(Math.floor(Math.random() * 100000000)).padStart(10, '0')}`,
+                    'Branch_Code': `BR${String(Math.floor(Math.random() * 100)).padStart(3, '0')}`,
+                    'Currency': getRandomElement(['USD', 'EUR', 'GBP', 'CAD', 'AUD']),
+                    'Exchange_Rate': (Math.random() * 2 + 0.5).toFixed(4),
+                    'Fee_Amount': (Math.random() * 25).toFixed(2),
+                    'Authorized_By': `${getRandomElement(firstNames)} ${getRandomElement(lastNames)}`
+                });
+            }
+            
+            return baseRecord;
+        }
+        
+        function generateEmployee(id, companyName) {
+            const complexity = document.getElementById('dataComplexity').value;
+            const firstName = getRandomElement(firstNames);
+            const lastName = getRandomElement(lastNames);
+            const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${companyName.toLowerCase().replace(/\s+/g, '')}.com`;
+            
+            const baseEmployee = {
+                'Employee_ID': `EMP${String(id).padStart(6, '0')}`,
+                'First_Name': firstName,
+                'Last_Name': lastName,
+                'Full_Name': `${firstName} ${lastName}`,
+                'Email': email,
+                'Department': getRandomElement(departments),
+                'Position': getRandomElement(['Junior', 'Senior', 'Lead', 'Manager', 'Director', 'VP', 'Specialist', 'Coordinator', 'Analyst']),
+                'Salary': Math.floor(Math.random() * 150000) + 35000,
+                'Hire_Date': getRandomDate(new Date(2015, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0]
+            };
+            
+            if (complexity !== 'basic') {
+                Object.assign(baseEmployee, {
+                    'Performance_Score': (Math.random() * 4 + 1).toFixed(2),
+                    'Location': getRandomElement(cities),
+                    'Manager_ID': id > 1000 ? `EMP${String(Math.floor(Math.random() * 1000) + 1).padStart(6, '0')}` : 'N/A',
+                    'Years_Experience': Math.floor(Math.random() * 25) + 1,
+                    'Primary_Skill': getRandomElement(skills),
+                    'Certification': Math.random() > 0.3 ? getRandomElement(certifications) : 'None'
+                });
+            }
+            
+            if (complexity === 'detailed' || complexity === 'comprehensive') {
+                Object.assign(baseEmployee, {
+                    'Phone_Number': `+1-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
+                    'Emergency_Contact': `${getRandomElement(firstNames)} ${getRandomElement(lastNames)}`,
+                    'Training_Hours': Math.floor(Math.random() * 100) + 10,
+                    'Last_Promotion': Math.random() > 0.4 ? getRandomDate(new Date(2020, 0, 1), new Date(2024, 11, 31)).toISOString().split('T')[0] : 'N/A',
+                    'Bonus_Eligible': Math.random() > 0.3 ? 'Yes' : 'No'
+                });
+            }
+            
+            if (complexity === 'comprehensive') {
+                Object.assign(baseEmployee, {
+                    'Birth_Date': getRandomDate(new Date(1970, 0, 1), new Date(2000, 11, 31)).toISOString().split('T')[0],
+                    'Marital_Status': getRandomElement(['Single', 'Married', 'Divorced', 'Widowed']),
+                    'Education_Level': getRandomElement(['High School', 'Associates', 'Bachelors', 'Masters', 'PhD']),
+                    'Work_From_Home': Math.random() > 0.6 ? 'Yes' : 'No',
+                    'Travel_Required': Math.random() > 0.7 ? 'Yes' : 'No'
+                });
+            }
+            
+            return baseEmployee;
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+        
+        function showProgress() {
+            document.getElementById('progressContainer').style.display = 'block';
+        }
+        
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+        
+        async function generateData() {
+            const rowCount = parseInt(document.getElementById('rowCount').value);
+            const dataType = document.getElementById('dataType').value;
+            const companyName = document.getElementById('companyName').value || 'Sample Company';
+            
+            showProgress();
+            document.getElementById('info').style.display = 'block';
+            document.getElementById('infoText').textContent = `Generating ${rowCount.toLocaleString()} ${dataType} records...`;
+            
+            generatedData = [];
+            const batchSize = 5000;
+            
+            for (let i = 0; i < rowCount; i += batchSize) {
+                const endIndex = Math.min(i + batchSize, rowCount);
+                
+                for (let j = i; j < endIndex; j++) {
+                    generatedData.push(generateRecord(j + 1, dataType, companyName));
+                }
+                
+                updateProgress((endIndex / rowCount) * 100);
+                document.getElementById('infoText').textContent = `Generated ${endIndex.toLocaleString()} / ${rowCount.toLocaleString()} records...`;
+                
+                // Allow UI to update
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            // Create workbook
+            const worksheet = XLSX.utils.json_to_sheet(generatedData);
+            currentWorkbook = XLSX.utils.book_new();
+            const sheetName = `${companyName} ${dataType.charAt(0).toUpperCase() + dataType.slice(1)}`;
+            XLSX.utils.book_append_sheet(currentWorkbook, worksheet, sheetName);
+            
+            // Calculate approximate file size
+            const jsonString = JSON.stringify(generatedData);
+            const approximateSize = (jsonString.length * 1.2) / (1024 * 1024); // Rough estimate
+            
+            hideProgress();
+            document.getElementById('infoText').textContent = 
+                `✅ Generated ${rowCount.toLocaleString()} ${dataType} records successfully! Estimated file size: ${approximateSize.toFixed(2)} MB`;
+            
+            document.getElementById('downloadBtn').disabled = false;
+            
+            // Show preview
+            showPreview();
+        }
+        
+        function showPreview() {
+            const previewData = generatedData.slice(0, 10);
+            const previewContainer = document.getElementById('preview');
+            
+            if (previewData.length === 0) return;
+            
+            const headers = Object.keys(previewData[0]);
+            
+            let tableHTML = '<h3>📊 Data Preview (First 10 records)</h3><table><thead><tr>';
+            headers.forEach(header => {
+                tableHTML += `<th>${header.replace(/_/g, ' ')}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+            
+            previewData.forEach(row => {
+                tableHTML += '<tr>';
+                headers.forEach(header => {
+                    tableHTML += `<td>${row[header] || ''}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table>';
+            previewContainer.innerHTML = tableHTML;
+        }
+        
+        function downloadExcel() {
+            if (!currentWorkbook) {
+                alert('Please generate data first!');
+                return;
+            }
+            
+            const companyName = document.getElementById('companyName').value || 'Sample_Company';
+            const dataType = document.getElementById('dataType').value;
+            const fileFormat = document.getElementById('fileFormat').value;
+            
+            const fileName = `${companyName.replace(/\s+/g, '_')}_${dataType.charAt(0).toUpperCase() + dataType.slice(1)}_Data.${fileFormat}`;
+            
+            if (fileFormat === 'csv') {
+                // Convert to CSV
+                const worksheet = currentWorkbook.Sheets[Object.keys(currentWorkbook.Sheets)[0]];
+                const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                const blob = new Blob([csvData], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+            } else {
+                XLSX.writeFile(currentWorkbook, fileName);
+            }
+            
+            document.getElementById('infoText').textContent = 
+                `📥 File '${fileName}' has been downloaded!`;
+        }
+        
+        // Update row count based on target size
+        document.getElementById('targetSize').addEventListener('input', function() {
+            const targetSize = parseInt(this.value);
+            const complexity = document.getElementById('dataComplexity').value;
+            
+            let estimatedRowsPerMB;
+            switch(complexity) {
+                case 'basic': estimatedRowsPerMB = 12000; break;
+                case 'standard': estimatedRowsPerMB = 8000; break;
+                case 'detailed': estimatedRowsPerMB = 6000; break;
+                case 'comprehensive': estimatedRowsPerMB = 4500; break;
+                default: estimatedRowsPerMB = 8000;
+            }
+            
+            const suggestedRows = Math.floor(targetSize * estimatedRowsPerMB);
+            document.getElementById('rowCount').value = suggestedRows;
+        });
+        
+        document.getElementById('dataComplexity').addEventListener('change', function() {
+            // Trigger the size calculation
+            document.getElementById('targetSize').dispatchEvent(new Event('input'));
+        });
+    </script>
+</body>
+</html>
