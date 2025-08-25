@@ -213,7 +213,7 @@ If this project helped you, please:
 ## 📞 Contact
 
 - **Issues**: Use GitHub Issues for bug reports and features
-- **Security**: For security concerns, Contact [https://bio.link/nomadicmehul]
+- **Security**: For security concerns, [Contact](https://bio.link/nomadicmehul)
 - **General**: Discussions tab for questions and community support
 
 ---
